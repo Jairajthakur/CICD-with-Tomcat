@@ -15,12 +15,12 @@
 
 ---
 
-# Step 1 - Keep the code in GitHub (use java-project-new)
+# Step 1 --> Keep the code in GitHub (use java-project-new)
 
 **https://github.com/Jairajthakur/java-project-maven-new.git**
 
 ---
 
-# Step 2 - Install Jenkins and Ansible in server using script
+# Step 2 --> Install Jenkins and Ansible in server using script
 
 Install Jenkins
