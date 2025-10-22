@@ -7,11 +7,11 @@
 
 **checkout --> Build --> Test --> Artifacts --> Nexus/S3 --> Deploy(Tomcat)**
 
-[Step 1](#Step-1) --> Push code to GitHub
-[Step 2](#Step-2) --> Generate Artifacts
-[Step 3](#Step-3) --> Storing the Artifacts
-[Step 4](#Step-4) --> Installing Tomcat
-[Step 5](#Step-5) --> Deploy the artifacts to nodes using Ansible
+[Step 1](#Step-1) --> Push code to GitHub</br>
+[Step 2](#Step-2) --> Generate Artifacts</br>
+[Step 3](#Step-3) --> Storing the Artifacts</br>
+[Step 4](#Step-4) --> Installing Tomcatv</br>
+[Step 5](#Step-5) --> Deploy the artifacts to nodes using Ansible</br>
 
 ---
 
