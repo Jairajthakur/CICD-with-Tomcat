@@ -50,8 +50,8 @@ Install Ansible
 - yum install python3 python3-pip -y</br>
 - ansible --version</br>
 
-# SETUP:</br>
-# Login to Jenkins+Ansible Server and setup connections to 2 Worker Nodes(tomcat1 and tomcat2)</br>
+# SETUP:
+# Login to Jenkins+Ansible Server and setup connections to 2 Worker Nodes(tomcat1 and tomcat2)
 
 ## First set the password for root
 - passwd root</br>
