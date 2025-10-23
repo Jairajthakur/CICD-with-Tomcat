@@ -50,15 +50,16 @@ Install Ansible
 - yum install python3 python3-pip -y</br>
 - ansible --version</br>
 
-SETUP:
-Login to Jenkins+Ansible Server and setup connections to 2 Worker Nodes(tomcat1 and tomcat2)</br>
+# SETUP:</br>
+# Login to Jenkins+Ansible Server and setup connections to 2 Worker Nodes(tomcat1 and tomcat2)</br>
 
-## first set the password for root
-passwd root</br>
-set new password: jai123</br>
+## First set the password for root
+- passwd root</br>
+- set new password: jai123</br>
 
-## enable all server to login as root
+## Enable all server to login as root
 - vi /etc/ssh/sshd_config (38 & 61 uncomment both lines)</br>
 - systemctl restart sshd</br>
 - systemctl status sshd</br>
 - hostname -i</br>
+
