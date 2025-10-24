@@ -25,43 +25,43 @@
 
 Install Jenkins
 =====================================================
-STEP-1: INSTALLING GIT JAVA-1.8.0 MAVEN</br>
-- yum install git java-1.8.0-openjdk maven -y</br>
+'''STEP-1: INSTALLING GIT JAVA-1.8.0 MAVEN</br>
+- yum install git java-1.8.0-openjdk maven -y</br>'''
 
-STEP-2: GETTING THE REPO (jenkins.io --> download -- > redhat)</br>
+'''STEP-2: GETTING THE REPO (jenkins.io --> download -- > redhat)</br>
 - sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo</br>
-- sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key</br>
+- sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key</br>'''
 
-STEP-3: DOWNLOAD JAVA11 AND JENKINS</br>
+'''STEP-3: DOWNLOAD JAVA11 AND JENKINS</br>
 - amazon-linux-extras install java-openjdk11 -y</br>
 - yum install jenkins -y</br>
-- update-alternatives --config java</br>
+- update-alternatives --config java</br>'''
 
-STEP-4: RESTARTING JENKINS (when we download service it will on stopped state)</br>
+'''STEP-4: RESTARTING JENKINS (when we download service it will on stopped state)</br>
 - systemctl start jenkins.service</br>
-- systemctl status jenkins.service</br>
+- systemctl status jenkins.service</br>'''
 
 ---
 
 # Setup Ansible and their worker nodes
-Install Ansible
 
+'''Install Ansible
 - dnf install ansible2 -y</br>
 - yum install python3 python3-pip -y</br>
-- ansible --version</br>
+- ansible --version</br>'''
 
 # SETUP:
 # Login to Jenkins+Ansible Server and setup connections to 2 Worker Nodes(tomcat1 and tomcat2)
 
 ## First set the password for root
-- passwd root</br>
-- set new password: jai123</br>
+'''- passwd root</br>
+- set new password: jai123</br>'''
 
 ## Enable all server to login as root
-- vi /etc/ssh/sshd_config (38 & 61 uncomment both lines)</br>
+'''- vi /etc/ssh/sshd_config (38 & 61 uncomment both lines)</br>
 - systemctl restart sshd</br>
 - systemctl status sshd</br>
-- hostname -i</br>
+- hostname -i</br>'''
 
 
 
