@@ -66,56 +66,56 @@ Install Ansible
 # Add Inventory file
 =============
 
-vi /etc/ansible/hosts
-## Ex 1: Ungrouped hosts, specify before any group headers.
-[Prod]
-172.31.20.40
-172.31.21.25
+vi /etc/ansible/hosts</br>
+## Ex 1: Ungrouped hosts, specify before any group headers.</br>
+[Prod]</br>
+172.31.20.40</br>
+172.31.21.25</br>
 
 Lets Generate SSH Keys, using this KEY Ansible server will communicate with worker nodes
 
 ssh-keygen
 
-ssh-copy-id root@private ip of prod-1
-ssh-copy-id root@private ip of prod-2
+ssh-copy-id root@private ip of prod-1</br>
+ssh-copy-id root@private ip of prod-2</br>
 
 # Step 3: Setup SonarQube
 
 install sonar
 
 ==============
-#! /bin/bash
-cd /opt/
-wget https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-8.9.6.50800.zip
-unzip sonarqube-8.9.6.50800.zip
-amazon-linux-extras install java-openjdk11 -y
-useradd sonar
-chown sonar:sonar sonarqube-8.9.6.50800 -R
-chmod 777 sonarqube-8.9.6.50800 -R
-su - sonar
-# use the below command manually after installation
-#sh /opt/sonarqube-8.9.6.50800/bin/linux-x86-64/sonar.sh start
-#echo "user=admin & password=admin"
+#! /bin/bash</br>
+cd /opt/</br>
+wget https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-8.9.6.50800.zip</br>
+unzip sonarqube-8.9.6.50800.zip</br>
+amazon-linux-extras install java-openjdk11 -y</br>
+useradd sonar</br>
+chown sonar:sonar sonarqube-8.9.6.50800 -R</br>
+chmod 777 sonarqube-8.9.6.50800 -R</br>
+su - sonar</br>
+# use the below command manually after installation</br>
+#sh /opt/sonarqube-8.9.6.50800/bin/linux-x86-64/sonar.sh start</br>
+#echo "user=admin & password=admin"</br>
 =================
 
 sh /opt/sonarqube-8.9.6.50800/bin/linux-x86-64/sonar.sh start
 
-http://IP:9000
-username: admin
-password: admin
+http://IP:9000</br>
+username: admin</br>
+password: admin</br>
 
-Add project --> Manually --> project=hotstarapp --> generate token--> hotstarapp --> click on maven
+Add project --> Manually --> project=hotstarapp --> generate token--> hotstarapp --> click on maven</br>
 31edb5e1b676bd8e6b4d8d78d4ea0ced41692375
 
 Install Plugins
 --------------
-SonarQube Scanner,
-Maven Integration plugins
-Sonar Scanner Quality Gates
-Nexus
-Ansible
-deploy to container,
-S3 Publisher
+SonarQube Scanner</br>
+Maven Integration plugins</br>
+Sonar Scanner Quality Gates</br>
+Nexus</br>
+Ansible</br>
+deploy to container</br>
+S3 Publisher</br>
 
 RESTART JENKINS
 
