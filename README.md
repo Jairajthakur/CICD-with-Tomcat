@@ -132,3 +132,113 @@ Go to System --> SonarQube servers --> Enable Environment Variables -->
 Go to  Tools --> SonarQube Scanner installations , Name = sonarscanner
 ------------
 
+
+Now Store the Artifacts to S3
+================================
+🔹 Step 1: Install the Plugin
+
+Go to Jenkins Dashboard → Manage Jenkins → Manage Plugins.
+
+Search for "S3 publisher" and "Pipeline: AWS Steps"(optional) install it.
+
+🔹 Step 2: Configure AWS Credentials</br>
+Go to Manage Jenkins → System → Amazon S3 profiles --> ProfileName=s3creds --> access key and secret key - Save</br>
+
+Go to your Jenkins Job → Configure -->  </br>
+ --> Post-build Actions.</br>
+ → Select "Publish artifacts to S3 bucket".</br>
+ --> Source = **/*.war</br>
+ --> Destination Bucket = jen-test-me-reyaz/</br>
+ --> Bucket Region = ap-south-1</br>
+ --> Server side Encryption</br>
+
+
+Step 4 --> Launch ubuntu 24 EC2 for Nexus t2.medium
+
+install Nexus
+------------
+
+## update the system packages</br>
+sudo apt-get update</br>
+
+## #1: Install OpenJDK 17 on Ubuntu 24.04 LTS</br>
+apt install openjdk-17-jdk openjdk-17-jre -y</br>
+
+##Download the SonaType Nexus on Ubuntu using wget</br>
+cd /opt</br>
+sudo wget https://download.sonatype.com/nexus/3/latest-unix.tar.gz  </br>
+
+
+##Extract the Nexus repository setup in /opt directory</br>
+tar -zxvf latest-unix.tar.gz    </br>
+
+##Rename the extracted Nexus setup folder to nexus</br>
+sudo mv /opt/nexus-3.72.0-04 /opt/nexus</br>
+
+##As security practice, not to run nexus service using root user, so lets create new user named nexus to run nexus service</br>
+sudo adduser nexus   --> give password</br>
+
+
+##To set no password for nexus user open the visudo file in ubuntu</br>
+sudo visudo</br>
+
+##Add below line into it , save and exit</br>
+nexus ALL=(ALL) NOPASSWD: ALL</br>
+
+##Give permission to nexus files and nexus directory to nexus user</br>
+sudo chown -R nexus:nexus /opt/nexus</br>
+sudo chown -R nexus:nexus /opt/sonatype-work</br>
+
+##To run nexus as service at boot time, open /opt/nexus/bin/nexus.rc file, uncomment it and add nexus user as shown below</br>
+sudo vi /opt/nexus/bin/nexus.rc</br>
+run_as_user="nexus"  </br>
+
+
+##To Increase the nexus JVM heap size, you can modify the size as shown below</br>
+vi /opt/nexus/bin/nexus.vmoptions</br>
+
+-Xms1024m</br>
+-Xmx1024m</br>
+-XX:MaxDirectMemorySize=1024m</br>
+
+-XX:LogFile=./sonatype-work/nexus3/log/jvm.log</br>
+-XX:-OmitStackTraceInFastThrow</br>
+-Djava.net.preferIPv4Stack=true</br>
+-Dkaraf.home=.</br>
+-Dkaraf.base=.</br>
+-Dkaraf.etc=etc/karaf</br>
+-Djava.util.logging.config.file=/etc/karaf/java.util.logging.properties</br>
+-Dkaraf.data=./sonatype-work/nexus3</br>
+-Dkaraf.log=./sonatype-work/nexus3/log</br>
+-Djava.io.tmpdir=./sonatype-work/nexus3/tmp</br>
+
+##To run nexus as service using Systemd</br>
+sudo vi /etc/systemd/system/nexus.service</br>
+
+
+[Unit]
+Description=nexus service</br>
+After=network.target</br>
+
+[Service]
+Type=forking</br>
+LimitNOFILE=65536</br>
+ExecStart=/opt/nexus/bin/nexus start</br>
+ExecStop=/opt/nexus/bin/nexus stop</br>
+User=nexus</br>
+Restart=on-abort</br>
+
+[Install]
+WantedBy=multi-user.target
+
+sudo systemctl start nexus
+
+sudo systemctl enable nexus
+
+sudo systemctl status nexus  
+
+tail -f /opt/sonatype-work/nexus3/log/nexus.log
+
+ufw allow 8081/tcp   --> if required
+
+http://server_IP:8081  
