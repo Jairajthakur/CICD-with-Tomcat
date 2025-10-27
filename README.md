@@ -242,3 +242,68 @@ tail -f /opt/sonatype-work/nexus3/log/nexus.log
 ufw allow 8081/tcp   --> if required
 
 http://server_IP:8081  
+
+Creating Repo
+=============
+
+Login , username: admin, password: cat /opt/nexus/sonatype-work/nexus3/admin.password
+Disable anonymous access
+
+Click on Setting Symbol --> Repositories --> Create repository --> maven2(hosted) --> name(projectname = hotstarapp) --> save
+
+Version Policy --> Snapshot --> Deployment policy --> allow to redeploy
+
+In Jenkins --> Manage Jenkins --> Credentials --> Username and password =--> Username: admin, Password: reyaz123, ID = nexuscreds
+
+
+Step 5 : Create a Jenkins pipeline
+-----------------------------------
+
+First install plugins - Nexus and Ansible, sonar, maven, deploy to container, S3 Publisher
+---------------------
+
+Jenkins --> Manage Jenkins --> plugins --> nexus artifact upload, SonarQube Scanner, Maven Integration, deploy to container and ansible --> install --> restart jenkins
+
+Manage Jenkins --> tools --> Add ansible --> Name=ansible, path = /bin
+
+pipeline code till artifacts and run the pipeline --> it will generate war file
+
+pipeline {
+    agent any
+   
+    stages {
+        stage('checkout') {
+            steps {
+                git 'https://github.com/ReyazShaik/java-project-maven-new.git&#39;
+            }
+        }
+        stage('build') {
+            steps {
+                sh 'mvn compile'
+            }
+        }
+        stage('test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar'
+                }
+            }
+        }
+
+        stage('artifact') {
+            steps {
+                sh 'mvn package'
+            }
+        }
+        stage('Upload to S3') {
+            steps {
+                s3Upload consoleLogLevel: 'INFO', dontSetBuildResultOnFailure: false, dontWaitForConcurrentBuildCompletion: false, entries: [[bucket: 'jenkins-artifacts-demo-test', excludedFile: '', flatten: false, gzipFiles: false, keepForever: false, managedArtifacts: false, noUploadOnFailure: false, selectedRegion: 'ap-south-1', showDirectlyInBrowser: false, sourceFile: '**/*.war', storageClass: 'STANDARD', uploadFromSlave: false, useServerSideEncryption: true]], pluginFailureResultConstraint: 'FAILURE', profileName: 's3creds', userMetadata: []
+            }
+        }
+    }
+}
