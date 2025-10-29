@@ -287,6 +287,120 @@ pipeline {
                 sh 'mvn test'
             }
         }
+        stage('artifact') {
+            steps {
+                sh 'mvn package'
+            }
+        }
+    }
+}
+
+**Build now***
+
+Integrate with Sonar
+-------------------
+
+pipeline {
+    agent any
+   
+    stages {
+        stage('checkout') {
+            steps {
+                git 'https://github.com/ReyazShaik/java-project-maven-new.git&#39;
+            }
+        }
+        stage('build') {
+            steps {
+                sh 'mvn compile'
+            }
+        }
+        stage('test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar'
+                }
+            }
+        }
+
+        stage('artifact') {
+            steps {
+                sh 'mvn package'
+            }
+        }
+    }
+}
+
+
+**Build now***
+
+Integrate with Nexus
+--------------------
+pipeline {
+    agent any
+   
+    stages {
+        stage('checkout') {
+            steps {
+                git 'https://github.com/ReyazShaik/java-project-maven-new.git&#39;
+            }
+        }
+        stage('build') {
+            steps {
+                sh 'mvn compile'
+            }
+        }
+        stage('test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+        stage('artifact') {
+            steps {
+                sh 'mvn package'
+            }
+        }
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar'
+                }
+            }
+        }
+        stage('nexus') {
+            steps {
+                nexusArtifactUploader artifacts: [[artifactId: 'myapp', classifier: '', file: 'target/myapp.war', type: '.war']], credentialsId: 'nexuscreds', groupId: 'in.reyaz', nexusUrl: '13.233.124.23:8081', nexusVersion: 'nexus3', protocol: 'http', repository: 'hotstarapp', version: '8.3.3-SNAPSHOT'
+            }
+        }
+    }
+}
+
+S3 Integration
+=============
+
+pipeline {
+    agent any
+   
+    stages {
+        stage('checkout') {
+            steps {
+                git 'https://github.com/ReyazShaik/java-project-maven-new.git&#39;
+            }
+        }
+        stage('build') {
+            steps {
+                sh 'mvn compile'
+            }
+        }
+        stage('test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') {
@@ -307,3 +421,247 @@ pipeline {
         }
     }
 }
+
+
+
+
+
+**Build now***
+
+Now Deployment to Production Nodes using Ansible
+--------------------------------------------------
+
+Go to Ansible master Server
+
+Install tomcat in all Production nodes using Ansible
+---------------------------------------------------
+
+vi tomcat.yml
+
+---
+- name: Setup Tomcat
+  hosts: all
+  become: yes
+  tasks:
+    - name: Download tomcat from dlcdn
+      get_url:
+        url: "https://dlcdn.apache.org/tomcat/tomcat-11/v11.0.10/bin/apache-tomcat-11.0.10.tar.gz&quot;
+        dest: "/root/"
+
+    - name: untar the apache file
+      command: tar -zxvf apache-tomcat-11.0.10.tar.gz
+
+    - name: Rename the tomcat
+      command: mv apache-tomcat-11.0.10 tomcat
+
+    - name: Install the latest available Java (OpenJDK)
+      yum:
+        name: java-17-amazon-corretto
+        state: present
+
+    - name: Setting the roles in tomcat-users.xml file
+      template:
+        src: tomcat-users.xml
+        dest: /root/tomcat/conf/tomcat-users.xml
+
+    - name: Delete two lines in context.xml
+      template:
+        src: context.xml
+        dest: /root/tomcat/webapps/manager/META-INF/context.xml
+    - name: Create Tomcat systemd Service File
+      copy:
+        dest: /etc/systemd/system/tomcat.service
+        content: |
+          [Unit]
+          Description=Apache Tomcat Server
+          After=network.target
+
+          [Service]
+          User=root
+          Group=root
+          Type=forking
+          Environment="JAVA_HOME=/usr/lib/jvm/jre"
+          Environment="CATALINA_HOME=/root/tomcat"
+          ExecStart=/root/tomcat/bin/startup.sh
+          ExecStop=/root/tomcat/bin/shutdown.sh
+          Restart=on-failure
+
+          [Install]
+          WantedBy=multi-user.target
+    - name: Reload systemd
+      systemd:
+        daemon_reload: yes
+    - name: Start tomcat Service
+      service:
+        name: tomcat
+        state: started
+        enabled: yes
+
+
+================================================================================
+
+sed -i 's/87/93/g' tomcat.yml  -- if required
+
+
+--> instead changing tomcat-user.xml and context.xml in all nodes just create files locally and replace in worker nodes
+
+--> vi tomcat-users.xml
+   this file is in git-hub copy paste the content --it has all changed usernames etc
+--> vi context.xml
+   this file is in git-hub copy paste the content --it has all changed usernames etc
+
+ansible-playbook tomcat.yml
+
+run the playbook --> it will install tomcat in all worker nodes
+check with workernodes ip, tomcat is working or not
+
+Now artifacts are in /var/lib/Jenkins/workspace/project/targets
+
+cd /var/lib/Jenkins/workspace/project/target
+
+now create another playbook
+
+Note: In below playbook, change the source to your target project directory
+
+vi deploy.yml
+---
+- name: Deploy war to tomcat servers
+  hosts: all
+  tasks:
+    - name: task1
+      copy:
+        src: /var/lib/jenkins/workspace/project/target/myapp.war
+        dest: /root/tomcat/webapps
+
+RUn the playbook
+
+ansible-playbook deploy.yml
+
+--------> this is manual work, not good, now use pipelines
+
+Integrate ansible to Jenkins
+===========================
+
+Manage Jenkins --> TOOLS --> Ansible --> name = ansible, path = /bin
+
+Manage Jenkins --> Credentials --> username and password --username = root , password = rooot123456 (password while setting up ssh connection to tomcat servers from ansible ssh) , ID = linuxcreds
+
+or
+
+Manage Jenkins --> Credentials --> SSH username with Private Key --username = ec2-user , id = linuxcreds
+Private Key -> Enter Directly--> Add --> pem file key
+
+
+mv deploy.yml /etc/ansible
+
+cd /etc/ansible --> all ansible files are in this folder
+   
+open pipeline --> add deploy stage --> generate pipeline syntax -->
+
+        stage('Run Ansible Playbook') {
+            steps {
+               
+            }
+ 
+
+Sample Step = ansibleplaybook:invoke an ansible playbook
+
+Ansible tool : ansible  
+Playbook file path in workspace = /etc/ansible/deploy.yml
+Inventory file path in workspace =  /etc/ansible/hosts
+SSH connection credentials = linuxcreds
+disable ssh host key check --> check it --> rest all defaults
+
+Below code will come
+-------------------
+ansiblePlaybook credentialsId: 'linuxcreds', disableHostKeyChecking: true, installation: 'ansible', inventory: '/etc/ansible/hosts', playbook: '/etc/ansible/deploy.yml', vaultTmpPath: ''
+
+
+Optional:
+(host subset - we can give test or dev or prod , no need to give in playbook host: dev)
+(in host subset give $server = prod)
+copy the script and put in deploy section in pipeline --> in pipeline ansible stage  see limit : '$server' will come
+
+Below code will come
+-------------------
+ansiblePlaybook credentialsId: 'tomcatcreds', disableHostKeyChecking: true, installation: 'ansible', inventory: '/etc/ansible/hosts', limit: '$server = prod', playbook: '/etc/ansible/deploy.yml', vaultTmpPath: ''
+
+
+before executing pipeline, undeploy application from tomcat by going to browser of workernodes
+
+pipeline {
+    agent any
+    stages {
+        stage('checkout') {
+            steps {
+                git 'https://github.com/ReyazShaik/java-project-maven-new.git&#39;
+            }
+        }
+        stage('build') {
+            steps {
+                sh 'mvn compile'
+            }
+        }
+        stage('test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar'
+                }
+            }
+        }
+        stage('artifact') {
+            steps {
+                sh 'mvn package'
+            }
+        }
+        stage('Run Ansible Playbook') {
+            steps {
+                ansiblePlaybook credentialsId: 'linuxcreds', disableHostKeyChecking: true, installation: 'ansible', inventory: '/etc/ansible/hosts', playbook: '/etc/ansible/deploy.yml', vaultTmpPath: ''
+            }
+        }
+    }
+}
+
+
+
+run the pipeline
+
+update the code in GitHub --> and click on build now
+
+How to add PARAMETERS - no need to give host subset use parameters , host : all in pipeline
+------------------------------------------------------
+The Project is parameterized
+Name: server
+choices parameter:  -- pass only single choice
+dev
+test
+prod
+
+if string parameter -- multiple choices if you want to pass
+Name: server
+
+save
+
+run the build with parameters  -- for string parameters give dev, test
+
+In below pipeline code changed to limit: '$server' , previously it was limit: '$server = prod'
+
+
+                ansiblePlaybook credentialsId: 'tomcatcreds', disableHostKeyChecking: true, installation: 'ansible', inventory: '/etc/ansible/hosts', limit: '$server', playbook: '/etc/ansible/deploy.yml', vaultTmpPath: ''
+
+
+
+if you want to checkout from another branch , we can parameter the branch name
+Add choice parameter: branch , choices : main, hotfix, ,master, etc
+
+in pipeline script
+
+            steps{
+                git branch: '$branch' url: 'https://github.com/ReyazShaik/java-project-maven-new.git&#39;
+            }
+        }
