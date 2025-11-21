@@ -139,10 +139,5 @@ Example entry in `tomcat-users.xml`:
 **Jairaj Singh**
 *DevOps Engineer | Automating CI/CD pipelines using Jenkins, Ansible, and Tomcat*
 
-👨‍💻 Author
-
-📧 Email: th.jairaj@gmail.com</br>
-🌐 GitHub: https://github.com/Jairajthakur</br>
-💼 LinkedIn: https://linkedin.com/in/jairajsinghchauhan</br>
 
 
